@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Air Hockey - WebGL Game</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Game Container -->
+    <div id="gameContainer">
+        <!-- WebGL Canvas -->
+        <canvas id="gameCanvas" width="1200" height="800"></canvas>
+        
+        <!-- Game UI Overlay -->
+        <div id="gameUI">
+            <!-- Score Display -->
+            <div id="scoreBoard">
+                <div class="player-score">
+                    <span class="player-label">Player 1</span>
+                    <span id="player1Score" class="score">0</span>
+                </div>
+                <div class="game-timer">
+                    <span id="gameTimer">Air Hockey</span>
+                </div>
+                <div class="player-score">
+                    <span class="player-label">Player 2</span>
+                    <span id="player2Score" class="score">0</span>
+                </div>
+            </div>
+            
+            <!-- Game Controls Info -->
+            <div id="controlsInfo">
+                <div class="control-group">
+                    <h3>Player 1 Controls</h3>
+                    <p><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> - Move Paddle</p>
+                </div>
+                <div class="control-group">
+                    <h3>Player 2 Controls</h3>
+                    <p><kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd> - Move Paddle</p>
+                </div>
+                <div class="control-group">
+                    <h3>Game Controls</h3>
+                    <p><kbd>SPACE</kbd> - Restart Game</p>
+                    <p><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> - Camera Views</p>
+                </div>
+            </div>
+            
+            <!-- Game Status Messages -->
+            <div id="gameStatus">
+                <div id="statusMessage">Use WASD and Arrow Keys to play!</div>
+            </div>
+            
+        
+        <!-- Loading Screen -->
+        <div id="loadingScreen">
+            <div class="loading-content">
+                <h1>3D Air Hockey</h1>
+                <div class="loading-spinner"></div>
+                <p>Loading WebGL resources...</p>
+                <div class="loading-bar">
+                    <div id="loadingProgress" class="loading-fill"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pause Menu -->
+        <div id="pauseMenu" class="hidden">
+            <div class="menu-content">
+                <h2>Game Paused</h2>
+                <div class="menu-buttons">
+                    <button id="resumeGame" class="menu-btn primary">Resume</button>
+                    <button id="restartGame" class="menu-btn">Restart</button>
+                    <button id="mainMenu" class="menu-btn">Main Menu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- WebGL Error Message -->
+    <div id="webglError" class="hidden">
+        <div class="error-content">
+            <h2>WebGL Not Supported</h2>
+            <p>Your browser doesn't support WebGL or it's disabled.</p>
+            <p>Please try a modern browser like Chrome, Firefox, or Safari.</p>
+        </div>
+    </div>
+    
+    <!-- Load gl-matrix library -->
+    <script src="libs/gl-matrix-min.js"></script>
+    <script>
+        // Handle gl-matrix API version compatibility
+        function initializeGlMatrix() {
+            // Check for modern gl-matrix (3.x+)
+            if (typeof glMatrix !== 'undefined') {
+                console.log('✅ Modern gl-matrix detected');
+                
+                // Expose functions globally for compatibility
+                if (glMatrix.mat4) {
+                    window.mat4 = glMatrix.mat4;
+                    window.mat3 = glMatrix.mat3;
+                    window.vec3 = glMatrix.vec3;
+                    window.vec4 = glMatrix.vec4;
+                    window.quat = glMatrix.quat;
+                    console.log('✅ gl-matrix functions exposed globally');
+                }
+            }
+            
+            // Check for legacy gl-matrix (2.x)
+            else if (typeof mat4 !== 'undefined') {
+                console.log('✅ Legacy gl-matrix detected');
+            }
+            
+            // Test if mat4 is now available
+            if (typeof mat4 !== 'undefined') {
+                try {
+                    const testMatrix = mat4.create();
+                    console.log('✅ mat4.create() test successful');
+                    return true;
+                } catch (error) {
+                    console.error(' mat4.create() test failed:', error);
+                    return false;
+                }
+            } else {
+                console.error('mat4 still not available after library initialization');
+                return false;
+            }
+        }
+        
+        // Initialize library and load game scripts
+        if (initializeGlMatrix()) {
+            console.log('✅ gl-matrix initialized successfully');
+            
+            // Hide loading screen
+            setTimeout(() => {
+                const loadingScreen = document.getElementById('loadingScreen');
+                if (loadingScreen) {
+                    loadingScreen.style.display = 'none';
+                }
+            }, 1000);
+            
+        } else {
+            console.error(' Failed to initialize gl-matrix');
+            document.getElementById('webglError').querySelector('.error-content h2').textContent = 'Library Loading Error';
+            document.getElementById('webglError').querySelector('.error-content p').textContent = 'gl-matrix library failed to initialize. Please check libs/gl-matrix-min.js';
+            document.getElementById('webglError').classList.remove('hidden');
+            document.getElementById('gameContainer').style.display = 'none';
+        }
+    </script>
+    
+    <!-- Game Scripts -->
+    <script src="js/geometry.js"></script>
+    <script src="js/gameObjects.js"></script>
+    <script src="js/camera.js"></script>
+    <script src="js/obj-loader.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
